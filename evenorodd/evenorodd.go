@@ -1,7 +1,5 @@
 package main
 
-func isEven(x int) bool {
-    return x % 2 == 0
+func isEvenOrOdd(x int) bool {
+	return x%2 == 0
 }
- 
-

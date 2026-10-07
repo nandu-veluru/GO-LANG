@@ -1,7 +1,7 @@
 package main 
 
 func absValue(n int) int {
-	if n > 0 {
+	if n < 0 {
 		return -n
 	}
 	return n

@@ -1,11 +1,29 @@
 package main
 
-import "testing"
-import "github.com/stretchr/testify/assert"
+import (
+	"math"
+	"math/rand"
+	"testing"
 
+	"github.com/stretchr/testify/assert"
+)
 
-func TestAdd(t *testing.T) {
-	actual := isEven(10)
+func TestShouldReturnTrueForEvenNumber(t *testing.T) {
+	randomNum := rand.Intn(math.MaxInt)
+	if randomNum%2 != 0 {
+		randomNum++
+	}
+	expected := true
+	actual := isEvenOrOdd(randomNum)
+	assert.Equal(t, expected, actual)
+}
 
-	assert.Equal(t, true, actual) 
+func TestShouldReturnFalseForOddNumber(t *testing.T) {
+	randomNum := rand.Intn(math.MaxInt)
+	if randomNum%2 == 0 {
+		randomNum++
+	}
+	expected := false
+	actual := isEvenOrOdd(randomNum)
+	assert.Equal(t, expected, actual)
 }

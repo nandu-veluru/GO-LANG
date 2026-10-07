@@ -1,8 +1,10 @@
 package main
+
 import (
+	"math"
 	"testing"
-	"github.com/stretchr/testify/assert"
 )
+
 func TestMultiply(t *testing.T) {
 	tests := []struct {
 		a, b int
@@ -13,6 +15,9 @@ func TestMultiply(t *testing.T) {
 		{-3, -3, 9},
 		{12, 24, 288},
 		{89078, 0, 0},
+		{1, 999, 999},
+		{math.MaxInt, 1, math.MaxInt},
+		{math.MaxInt, 0, 0},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
