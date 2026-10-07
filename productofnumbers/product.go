@@ -1,0 +1,4 @@
+package main
+func multiply(x int, y int) int {
+	return x * y
+}
