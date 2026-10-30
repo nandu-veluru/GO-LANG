@@ -20,13 +20,15 @@
 * * Staff will checking guest which doesn't exist to a specific room
 * * Staff will check Occupancy Status of the hotel room
 
-* staff should create service request 
-* * request must have unique id --> number, request type, status
-* * staff should able to record guest request
+* * hotel able to view staff records
+* * staff able to view guest records
 
-* hotel should assgin work(request) to staff
-* * request should assigned to a availble staff member
-* * request should not be alloted who is assigned to work already
+* hotel should create RoomServiceManager 
+* * add request types
+* * validate room numbers and request type
+* * reject blank request values
 
+* Queue management system for hotel staff
+* * 
 
 

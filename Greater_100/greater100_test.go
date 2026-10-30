@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"math/rand"
 	"testing"
 
@@ -8,7 +9,7 @@ import (
 )
 
 func TestShouldReturnTrueForNumberGreaterThan100(t *testing.T) {
-	randomNumber := rand.Intn(100000) + 101
+	randomNumber := rand.Intn(math.MaxInt) + 101
 	expected := true
 	actual := isGreater(randomNumber)
 	assert.Equal(t, expected, actual)

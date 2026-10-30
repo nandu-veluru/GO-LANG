@@ -128,3 +128,39 @@ func TestStaffShouldValidateRoom(t *testing.T) {
 	}
 
 }
+
+func TestCreateRequest(t *testing.T) {
+
+	h := hotel{}
+	s := h.addStaff(1, "Nandini")
+
+	s.addRoom(&h, 101, "Deluxe")
+
+	m := RoomServiceManager{}
+
+	err := m.createRequest(&h, 1, 101, "housekeeping")
+
+	if err != nil {
+		t.Error("Valid request was not created")
+	}
+
+	if len(m.request) != 1 {
+		t.Error("Request not added")
+	}
+
+	if m.request[0].requestId != 1 {
+		t.Error("Request ID mismatch")
+	}
+
+	if m.request[0].roomNumber != 101 {
+		t.Error("Room number mismatch")
+	}
+
+	if m.request[0].requestType != "housekeeping" {
+		t.Error("Request type mismatch")
+	}
+
+	if m.request[0].requestType == " " {
+		t.Error("Request type cant be blank")
+	}
+}
