@@ -1,3 +1,4 @@
+
 package main
 
 import (
@@ -61,9 +62,9 @@ func TestStaffShouldAddRoom(t *testing.T) {
 func TestStaffShouldAddGuest(t *testing.T) {
 	h := hotel{}
 
-	g := h.addStaff(1, "Nandini")
+	h.addStaff(1, "Nandini")
 
-	g.addGuest(&h, 121, "Alice")
+	h.addGuest(121, "Alice")
 
 	if len(h.guestDetails) != 1 {
 		t.Error("guest is not added to hotel")
@@ -85,7 +86,7 @@ func TestStaffShouldCheckOccupancyStatus(t *testing.T) {
 
 	s.addRoom(&h, 101, "Deluxe")
 
-	occupied := s.checkOccupancyStatus(&h, 101)
+	occupied := h.checkOccupancyStatus(101)
 
 	if occupied {
 		t.Error("Room is occupied")
@@ -112,21 +113,20 @@ func TestStaffShouldValidateRoom(t *testing.T) {
 	err = s.addRoom(&h, -1, "Deluxe")
 
 	if err == nil {
-		t.Error("Negitive room number accepted")
+		t.Error("Negative room number accepted")
 	}
 
 	err = s.addRoom(&h, -1, "suite")
 
 	if err == nil {
-		t.Error("Inalid room type is accepted")
+		t.Error("Invalid room type is accepted")
 	}
 
-	err = s.addRoom(&h, 101, "standard")
+	err = s.addRoom(&h, 101, "Deluxe")
 
 	if err == nil {
-		t.Error("Dulicate number accepted")
+		t.Error("Duplicate number accepted")
 	}
-
 }
 
 func TestCreateRequest(t *testing.T) {
@@ -138,7 +138,7 @@ func TestCreateRequest(t *testing.T) {
 
 	m := RoomServiceManager{}
 
-	err := m.createRequest(&h, 1, 101, "housekeeping")
+	err := m.createRequest(&h, 1, 101, "housekeeping", "HIGH")
 
 	if err != nil {
 		t.Error("Valid request was not created")
@@ -162,5 +162,179 @@ func TestCreateRequest(t *testing.T) {
 
 	if m.request[0].requestType == " " {
 		t.Error("Request type cant be blank")
+	}
+}
+
+func TestFindRequestById(t *testing.T) {
+
+	h := hotel{}
+	s := h.addStaff(1, "Nandini")
+	s.addRoom(&h, 101, "Deluxe")
+
+	m := RoomServiceManager{}
+
+	m.createRequest(&h, 1, 101, "food", "HIGH")
+
+	req, err := m.findRequestById(1)
+
+	if err != nil {
+		t.Error("Request not found")
+	}
+
+	if req.requestId != 1 {
+		t.Error("Request ID mismatch")
+	}
+
+	if req.roomNumber != 101 {
+		t.Error("Room number mismatch")
+	}
+
+	_, err = m.findRequestById(2)
+
+	if err == nil {
+		t.Error("Invalid request ID was accepted")
+	}
+}
+
+func TestListRequests(t *testing.T) {
+
+	h := hotel{}
+	s := h.addStaff(1, "Nandini")
+	s.addRoom(&h, 101, "Deluxe")
+	s.addRoom(&h, 102, "Suite")
+
+	m := RoomServiceManager{}
+
+	m.createRequest(&h, 1, 101, "food", "HIGH")
+	m.createRequest(&h, 2, 102, "towels", "NORMAL")
+
+	result := m.listRequests()
+
+	if len(result) != 2 {
+		t.Error("Request list length mismatch")
+	}
+
+	if result[0].requestId != 1 {
+		t.Error("First request ID mismatch")
+	}
+
+	if result[1].requestId != 2 {
+		t.Error("Second request ID mismatch")
+	}
+}
+
+func TestUpdateRequestStatus(t *testing.T) {
+
+	h := hotel{}
+	s := h.addStaff(1, "Nandini")
+	s.addRoom(&h, 101, "Deluxe")
+
+	m := RoomServiceManager{}
+
+	m.createRequest(&h, 1, 101, "food", "HIGH")
+
+	err := m.updateRequestStatus(1, IN_PROGRESS)
+
+	if err != nil {
+		t.Error("OPEN request was not moved to IN_PROGRESS")
+	}
+
+	if m.request[0].status != IN_PROGRESS {
+		t.Error("Request status was not updated to IN_PROGRESS")
+	}
+
+	err = m.updateRequestStatus(1, COMPLETED)
+
+	if err != nil {
+		t.Error("IN_PROGRESS request was not moved to COMPLETED")
+	}
+
+	if m.request[0].status != COMPLETED {
+		t.Error("Request status was not updated to COMPLETED")
+	}
+
+	err = m.updateRequestStatus(1, CANCELLED)
+
+	if err == nil {
+		t.Error("Completed request should not be cancelled")
+	}
+}
+
+func TestFilterByStatus(t *testing.T) {
+
+	h := hotel{}
+	s := h.addStaff(1, "Nandini")
+	s.addRoom(&h, 101, "Deluxe")
+	s.addRoom(&h, 102, "Suite")
+
+	m := RoomServiceManager{}
+
+	m.createRequest(&h, 1, 101, "food", "HIGH")
+	m.createRequest(&h, 2, 102, "towels", "NORMAL")
+
+	m.updateRequestStatus(2, IN_PROGRESS)
+
+	result := m.filterByStatus(OPEN)
+
+	if len(result) != 1 {
+		t.Error("OPEN status filter failed")
+	}
+
+	if result[0].requestId != 1 {
+		t.Error("Incorrect request returned")
+	}
+
+	result = m.filterByStatus(IN_PROGRESS)
+
+	if len(result) != 1 {
+		t.Error("IN_PROGRESS status filter failed")
+	}
+}
+
+func TestFilterByRoomNumber(t *testing.T) {
+
+	h := hotel{}
+	s := h.addStaff(1, "Nandini")
+	s.addRoom(&h, 101, "Deluxe")
+	s.addRoom(&h, 102, "Suite")
+
+	m := RoomServiceManager{}
+
+	m.createRequest(&h, 1, 101, "food", "HIGH")
+	m.createRequest(&h, 2, 102, "towels", "NORMAL")
+	m.createRequest(&h, 3, 101, "housekeeping", "LOW")
+
+	result := m.filterByRoomNumber(101)
+
+	if len(result) != 2 {
+		t.Error("Room number filter failed")
+	}
+
+	if result[0].roomNumber != 101 {
+		t.Error("Incorrect room number returned")
+	}
+}
+
+func TestFilterByRequestType(t *testing.T) {
+
+	h := hotel{}
+	s := h.addStaff(1, "Nandini")
+	s.addRoom(&h, 101, "Deluxe")
+	s.addRoom(&h, 102, "Suite")
+
+	m := RoomServiceManager{}
+
+	m.createRequest(&h, 1, 101, "food", "HIGH")
+	m.createRequest(&h, 2, 102, "towels", "NORMAL")
+	m.createRequest(&h, 3, 101, "food", "LOW")
+
+	result := m.filterByRequestType("food")
+
+	if len(result) != 2 {
+		t.Error("Request type filter failed")
+	}
+
+	if result[0].requestType != "food" {
+		t.Error("Incorrect request type returned")
 	}
 }

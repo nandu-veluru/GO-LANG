@@ -29,6 +29,18 @@
 * * reject blank request values
 
 * Queue management system for hotel staff
-* * 
+* * all the requests should be maintained in Request Lifecycle 
+* * OPEN -> IN_PROGRESS -> COMPLETED (or CANCELLED)
+* * staff can  staff to filter and inspect the request queue by status, room number, or request type.
 
+* Add proroity values 
+* * LOW, NORMAL AND HIGH
+* * Add prority field to RoomServiceManager struct
+* * Staff need to assign prority when request is started
+* * validate the prority 
+
+* Implement prority based queue
+* * High priority request first
+* * Normal priority request next
+* * Low priority request last
 
