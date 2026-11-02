@@ -1,4 +1,3 @@
-
 package main
 
 type room struct {
@@ -13,8 +12,9 @@ type guest struct {
 }
 
 type staff struct {
-	id   int
-	name string
+	id       int
+	name     string
+	avalible bool
 }
 
 type hotel struct {
@@ -28,8 +28,8 @@ func (h *hotel) addRoom(r room) room {
 	return r
 }
 
-func (h *hotel) addStaff(id int, name string) staff {
-	s := staff{id, name}
+func (h *hotel) addStaff(id int, name string, avalible bool) staff {
+	s := staff{id, name, avalible}
 	h.staffDetails = append(h.staffDetails, s)
 	return s
 }

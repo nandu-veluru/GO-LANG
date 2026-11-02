@@ -1,13 +1,17 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"sort"
+)
 
 type serviceRequest struct {
-	requestId   int
-	roomNumber  int
-	requestType string
-	status      string
-	priority    string
+	requestId       int
+	roomNumber      int
+	requestType     string
+	status          string
+	priority        string
+	assignedStaffId int
 }
 
 const (
@@ -84,8 +88,8 @@ func (m *RoomServiceManager) createRequest(h *hotel, id int, roomNumber int, req
 	}
 
 	if priority != LOW && priority != NORMAL && priority != HIGH {
-        return errors.New("Invalid priority")
-    }
+		return errors.New("Invalid priority")
+	}
 
 	req := serviceRequest{
 		requestId:   id,
@@ -171,6 +175,70 @@ func (m *RoomServiceManager) updateRequestStatus(requestId int, status string) e
 	return errors.New("Request not found")
 }
 
+func priorityValue(priority string) int {
+
+	if priority == HIGH {
+		return 1
+	} else if priority == NORMAL {
+		return 2
+	} else {
+		return 3
+	}
+}
+
+func (m *RoomServiceManager) sortRequestsByPriority() []serviceRequest {
+
+	result := m.listRequests()
+
+	sort.SliceStable(result, func(i, j int) bool {
+		return priorityValue(result[i].priority) < priorityValue(result[j].priority)
+	})
+	return result
+}
+
+func (m *RoomServiceManager) assignRequestToAvailbleStaff(h *hotel) error {
+
+	result := m.sortRequestsByPriority()
+
+	var selectRequestId int
+
+	for _, r := range result {
+
+		if r.status == "OPEN" {
+			selectRequestId = r.requestId
+			break
+		}
+
+		if selectRequestId == 0 {
+			return errors.New("Request id is not Available")
+		}
+
+		staffAvailble := false
+
+		for i := range h.staffDetails {
+
+			if h.staffDetails[i].avalible {
+
+				for j := range m.request {
+
+					if m.request[j].requestId == selectRequestId {
+
+						m.request[j].assignedStaffId = h.staffDetails[i].id
+						m.request[j].status = IN_PROGRESS
+
+						h.staffDetails[i].avalible = false
+						staffAvailble = true
+					}
+				}
+			}
+		}
+		if !staffAvailble {
+			return errors.New("Staff is not availble")
+		}
+	}
+	return nil
+}
+
 func (m *RoomServiceManager) filterByStatus(status string) []serviceRequest {
 
 	result := []serviceRequest{}
@@ -184,7 +252,6 @@ func (m *RoomServiceManager) filterByStatus(status string) []serviceRequest {
 			}
 		}
 	}
-
 	return result
 }
 

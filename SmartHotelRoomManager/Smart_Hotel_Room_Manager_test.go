@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -25,7 +24,7 @@ func TestHotelInitialization(t *testing.T) {
 func TestAddStaff(t *testing.T) {
 	h := hotel{}
 
-	h.addStaff(1, "Nandini")
+	h.addStaff(1, "Nandini", true)
 
 	if len(h.staffDetails) != 1 {
 		t.Error("Staff not added to the hotel")
@@ -42,7 +41,7 @@ func TestAddStaff(t *testing.T) {
 
 func TestStaffShouldAddRoom(t *testing.T) {
 	h := hotel{}
-	s := h.addStaff(1, "Nandini")
+	s := h.addStaff(1, "Nandini", true)
 
 	s.addRoom(&h, 101, "Deluxe")
 
@@ -62,7 +61,7 @@ func TestStaffShouldAddRoom(t *testing.T) {
 func TestStaffShouldAddGuest(t *testing.T) {
 	h := hotel{}
 
-	h.addStaff(1, "Nandini")
+	h.addStaff(1, "Nandini", true)
 
 	h.addGuest(121, "Alice")
 
@@ -82,7 +81,7 @@ func TestStaffShouldAddGuest(t *testing.T) {
 func TestStaffShouldCheckOccupancyStatus(t *testing.T) {
 	h := hotel{}
 
-	s := h.addStaff(1, "Nandini")
+	s := h.addStaff(1, "Nandini", true)
 
 	s.addRoom(&h, 101, "Deluxe")
 
@@ -96,7 +95,7 @@ func TestStaffShouldCheckOccupancyStatus(t *testing.T) {
 func TestStaffShouldValidateRoom(t *testing.T) {
 
 	h := hotel{}
-	s := h.addStaff(1, "Nandini")
+	s := h.addStaff(1, "Nandini", true)
 
 	err := s.addRoom(&h, 101, "Deluxe")
 
@@ -132,7 +131,7 @@ func TestStaffShouldValidateRoom(t *testing.T) {
 func TestCreateRequest(t *testing.T) {
 
 	h := hotel{}
-	s := h.addStaff(1, "Nandini")
+	s := h.addStaff(1, "Nandini", true)
 
 	s.addRoom(&h, 101, "Deluxe")
 
@@ -168,7 +167,7 @@ func TestCreateRequest(t *testing.T) {
 func TestFindRequestById(t *testing.T) {
 
 	h := hotel{}
-	s := h.addStaff(1, "Nandini")
+	s := h.addStaff(1, "Nandini", true)
 	s.addRoom(&h, 101, "Deluxe")
 
 	m := RoomServiceManager{}
@@ -199,7 +198,7 @@ func TestFindRequestById(t *testing.T) {
 func TestListRequests(t *testing.T) {
 
 	h := hotel{}
-	s := h.addStaff(1, "Nandini")
+	s := h.addStaff(1, "Nandini", true)
 	s.addRoom(&h, 101, "Deluxe")
 	s.addRoom(&h, 102, "Suite")
 
@@ -226,7 +225,7 @@ func TestListRequests(t *testing.T) {
 func TestUpdateRequestStatus(t *testing.T) {
 
 	h := hotel{}
-	s := h.addStaff(1, "Nandini")
+	s := h.addStaff(1, "Nandini", true)
 	s.addRoom(&h, 101, "Deluxe")
 
 	m := RoomServiceManager{}
@@ -263,7 +262,8 @@ func TestUpdateRequestStatus(t *testing.T) {
 func TestFilterByStatus(t *testing.T) {
 
 	h := hotel{}
-	s := h.addStaff(1, "Nandini")
+	s := h.addStaff(1, "Nandini", true)
+
 	s.addRoom(&h, 101, "Deluxe")
 	s.addRoom(&h, 102, "Suite")
 
@@ -294,7 +294,7 @@ func TestFilterByStatus(t *testing.T) {
 func TestFilterByRoomNumber(t *testing.T) {
 
 	h := hotel{}
-	s := h.addStaff(1, "Nandini")
+	s := h.addStaff(1, "Nandini", true)
 	s.addRoom(&h, 101, "Deluxe")
 	s.addRoom(&h, 102, "Suite")
 
@@ -318,7 +318,7 @@ func TestFilterByRoomNumber(t *testing.T) {
 func TestFilterByRequestType(t *testing.T) {
 
 	h := hotel{}
-	s := h.addStaff(1, "Nandini")
+	s := h.addStaff(1, "Nandini", true)
 	s.addRoom(&h, 101, "Deluxe")
 	s.addRoom(&h, 102, "Suite")
 
@@ -336,5 +336,34 @@ func TestFilterByRequestType(t *testing.T) {
 
 	if result[0].requestType != "food" {
 		t.Error("Incorrect request type returned")
+	}
+}
+
+func TestAssignRequestToAvailavleStaff(t *testing.T) {
+
+	h := hotel{}
+	s := h.addStaff(1, "Nandini", true)
+
+	s.addRoom(&h, 101, "Deluxe")
+	s.addRoom(&h, 102, "Suite")
+
+	m := RoomServiceManager{}
+
+	m.createRequest(&h, 1, 101, "food", "HIGH")
+	m.createRequest(&h, 2, 102, "towels", "NORMAL")
+	m.createRequest(&h, 3, 101, "food", "LOW")
+
+	err := m.assignRequestToAvailbleStaff(&h)
+
+	if err != nil {
+		t.Error("Staff is not assigned To any request")
+	}
+
+	if m.request[0].requestId != 1 {
+		t.Error("Priority request mismatched")
+	}
+
+	if m.request[0].status != OPEN {
+		t.Error("request is not open")
 	}
 }

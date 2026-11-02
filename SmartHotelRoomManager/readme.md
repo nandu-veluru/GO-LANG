@@ -37,10 +37,19 @@
 * * LOW, NORMAL AND HIGH
 * * Add prority field to RoomServiceManager struct
 * * Staff need to assign prority when request is started
+* * if both values are same consider frist given request
 * * validate the prority 
 
 * Implement prority based queue
 * * High priority request first
 * * Normal priority request next
 * * Low priority request last
+* * Assign the availble staff according to the priority
+* * staff will open request and mark as complete after work done
+
+* * supervisor will check the prioritized queue
+* * supervisor will assign the task for eligible staff member
+* * staff starts the works and completes it
+* * supervisor views about staff work
+
 
